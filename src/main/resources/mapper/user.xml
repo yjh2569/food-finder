@@ -4,7 +4,7 @@
 
 <mapper namespace="com.yjh.foodFinder.model.mapper.UserMapper">
 	<select id="checkById" parameterType="string" resultType="UserDto">
-		select userid, password, username, email, role, expired from user
+		select userid, password, username, email, role, expired, regtime from user
 		where userid = #{userid}
 	</select>
 	<insert id="register" parameterType="UserDto">

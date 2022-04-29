@@ -10,7 +10,7 @@ public class UserDto {
 	private String username;
 	private String email;
 	private String regtime;
-	private Role role;
+	private String role;
 	private boolean expired;
 
 	public UserDto() {
@@ -63,11 +63,11 @@ public class UserDto {
 		this.regtime = regtime;
 	}
 
-	public Role getRole() {
+	public String getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
+	public void setRole(String role) {
 		this.role = role;
 	}
 
