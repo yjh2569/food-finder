@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yjh.foodFinder.model.mapper.UserMapper">
+	<select id="checkById" parameterType="string" resultType="UserDto">
+		select userid, password, username, email, role, expired from user
+		where userid = #{userid}
+	</select>
+	<insert id="register" parameterType="UserDto">
+		insert into user (userid, password, username, email, regtime)
+		values (#{userid}, #{password}, #{username}, #{email}, now())
+	</insert>
+</mapper>
