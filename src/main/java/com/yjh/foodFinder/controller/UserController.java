@@ -1,6 +1,7 @@
 package com.yjh.foodFinder.controller;
 
 import java.util.Collections;
+import java.util.NoSuchElementException;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -13,11 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yjh.foodFinder.model.User;
 import com.yjh.foodFinder.model.UserDto;
 import com.yjh.foodFinder.model.dao.UserRepository;
+import com.yjh.foodFinder.model.service.UserService;
 import com.yjh.foodFinder.security.JwtAuthenticationProvider;
 
 import io.swagger.annotations.Api;
@@ -28,18 +32,26 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 //@CrossOrigin("*")
+@RequestMapping("/api/user")
 @Api("사용자 컨트롤러  API V1")
 public class UserController {
 	
 	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private UserService userService;
 	
 	@Autowired
 	private JwtAuthenticationProvider jwtAuthenticationProvider;
 	
+	@ApiOperation(value = "아이디 체크", notes = "회원가입 시 아이디 중복 여부를 확인합니다. boolean 값을 반환하는데, true인 경우 사용 가능한 아이디임을 의미합니다.")
+	@ApiResponses({
+		@ApiResponse(code = 200, message = "아이디 체크 성공"),
+		@ApiResponse(code = 404, message = "요청 가능한 페이지 없음"),
+		@ApiResponse(code = 500, message = "서버 에러")
+	})
+	@GetMapping("/idCheck")
+	public ResponseEntity<Boolean> idCheck(@RequestParam("userid") String userid) {
+		return new ResponseEntity<Boolean>(userService.idCheck(userid), HttpStatus.OK);
+    }
 	@ApiOperation(value = "로그인", notes = "아이디와 비밀번호를 통해 로그인해서 회원의 정보를 얻어옵니다.")
 	@ApiResponses({
 		@ApiResponse(code = 200, message = "로그인 성공"),
@@ -49,11 +61,7 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<UserDto> login(@RequestBody UserDto user, HttpServletResponse response) {
 		try {
-			User member = userRepository.findByUserid(user.getUserid())
-	        		.orElseThrow(() -> new IllegalArgumentException("가입되지 않은 ID입니다."));
-	        if (!passwordEncoder.matches(user.getPassword(), member.getPassword())) {
-	        	throw new IllegalArgumentException("잘못된 비밀번호입니다.");
-	        }
+			User member = userService.login(user);
 	        
 	        String token = jwtAuthenticationProvider.createToken(member.getUsername(), member.getRoles());
 	        response.setHeader("X-AUTH-TOKEN", token);
@@ -80,14 +88,7 @@ public class UserController {
 	@PostMapping("/join")
     public ResponseEntity<?> register(@RequestBody UserDto user) {
         try {
-        	userRepository.save(User.builder()
-        			.email(user.getEmail())
-        			.password(passwordEncoder.encode(user.getPassword()))
-        			.name(user.getName())
-        			.phoneNumber(user.getPhoneNumber())
-        			.userid(user.getUserid())
-        			.roles(Collections.singletonList("ROLE_USER"))
-        			.build());
+        	userService.register(user);
             return new ResponseEntity<String>("회원 가입 성공", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<String>("회원 가입 실패 "+e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

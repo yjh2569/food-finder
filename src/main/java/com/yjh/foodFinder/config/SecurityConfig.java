@@ -26,7 +26,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 				.httpBasic().disable()
-				.logout().logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("X-AUTH-TOKEN")
+				.logout().logoutUrl("/api/user/logout").logoutSuccessUrl("/").deleteCookies("X-AUTH-TOKEN")
 				.and()
 				.cors().and()
 				.csrf().disable()
