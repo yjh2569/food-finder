@@ -59,8 +59,10 @@ public class UserController {
 		@ApiResponse(code = 500, message = "서버 에러")
 	})
 	@PostMapping("/login")
-	public ResponseEntity<UserDto> login(@RequestBody UserDto user, HttpServletResponse response) {
+	public ResponseEntity<?> login(@RequestBody UserDto user, HttpServletResponse response) {
 		try {
+			System.out.println(user);
+			System.out.println(user.getUserid());
 			User member = userService.login(user);
 	        
 	        String token = jwtAuthenticationProvider.createToken(member.getUsername(), member.getRoles());
@@ -72,9 +74,10 @@ public class UserController {
 	        cookie.setSecure(true);
 	        response.addCookie(cookie);
 	        
-	        return new ResponseEntity<UserDto>(new UserDto(member), HttpStatus.OK);
+	        return new ResponseEntity<UserDto>(user, HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<UserDto>(new UserDto(), HttpStatus.NOT_FOUND);
+			System.out.println(e);
+			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		}
         
     }
@@ -115,7 +118,9 @@ public class UserController {
 	@GetMapping("/info")
 	public UserDto getInfo() {
 		Object details = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (details != null && !(details instanceof String)) return new UserDto((User) details);
+		User user = (User) details;
+		UserDto userDto = new UserDto(user.getUserid(), user.getPassword(), user.getName(), user.getPhoneNumber(), user.getEmail());
+		if (details != null && !(details instanceof String)) return userDto;
 		return null;
 	}
 }
