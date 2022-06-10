@@ -5,11 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -62,7 +59,7 @@ public class User implements UserDetails {
 		this.name = name;
 		this.email = email;
 	}
-
+	
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return this.roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());

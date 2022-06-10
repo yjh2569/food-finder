@@ -1,45 +1,53 @@
 import React, { useState, useEffect } from "react";
 import "./Login.css";
-import axios from "axios";
-import qs from "query-string";
+import { useDispatch, useSelector } from "react-redux";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { useNavigate } from "react-router-dom";
+import { userLogin } from "../reducers/userReducer";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const loginStatus = useSelector((state) => {
+    return state.user.status;
+  });
+
   const [data, setData] = useState({
     userid: "",
-    password: ""
+    password: "",
   });
 
   const handleChange = (e) => {
     const value = e.target.value;
     setData({
       ...data,
-      [e.target.name]: value
+      [e.target.name]: value,
     });
   };
 
-  const loginBtnClicked = (e) => {
+  useEffect(() => {
+    if (loginStatus === "successed") {
+      alert("로그인에 성공했습니다.");
+      navigate("/");
+    } else if (loginStatus === "failed") {
+      alert("아이디 또는 비밀번호가 잘못되었습니다.");
+    }
+  }, [loginStatus]);
+
+  const loginBtnClicked = async (e) => {
     e.preventDefault();
-    console.log("clicked");
-    console.log(data.userid+" "+data.password);
-    axios
-      .post(
-        "/api/user/login",
-        qs.stringify({
-          userid: data.userid,
-          password: data.password,
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-        }
-      )
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((response) => {
-        console.log(response);
-      });
+    let user = {
+      userid: data.userid,
+      password: data.password,
+    };
+    try {
+      const resultAction = await dispatch(userLogin(user));
+      unwrapResult(resultAction);
+    } catch (err) {
+      alert("로그인에 실패했습니다.");
+      console.error("Failed to login : " + err);
+      navigate("/login");
+    }
   };
 
   return (
@@ -68,7 +76,11 @@ const Login = () => {
         </div>
         <div className="m-3">
           <div className="custom-control custom-checkbox">
-            <input type="checkbox" className="custom-control-input" id="customCheck1" />
+            <input
+              type="checkbox"
+              className="custom-control-input"
+              id="customCheck1"
+            />
             <label className="custom-control-label" htmlFor="customCheck1">
               아이디 저장
             </label>

@@ -11,12 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.yjh.foodFinder.model.User;
 import com.yjh.foodFinder.model.UserDto;
@@ -28,7 +23,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 //@CrossOrigin("*")
@@ -61,8 +55,6 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody UserDto user, HttpServletResponse response) {
 		try {
-			System.out.println(user);
-			System.out.println(user.getUserid());
 			User member = userService.login(user);
 	        
 	        String token = jwtAuthenticationProvider.createToken(member.getUsername(), member.getRoles());
@@ -118,9 +110,11 @@ public class UserController {
 	@GetMapping("/info")
 	public UserDto getInfo() {
 		Object details = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		User user = (User) details;
-		UserDto userDto = new UserDto(user.getUserid(), user.getPassword(), user.getName(), user.getPhoneNumber(), user.getEmail());
-		if (details != null && !(details instanceof String)) return userDto;
+		if (details != null && !(details instanceof String)) {
+			User user = (User) details;
+			UserDto userDto = new UserDto(user.getUserid(), user.getPassword(), user.getName(), user.getPhoneNumber(), user.getEmail());
+			return userDto;
+		}
 		return null;
 	}
 }
