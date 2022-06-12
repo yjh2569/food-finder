@@ -32,13 +32,22 @@ const NavBar = () => {
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           {!isLogin && (
-            <Button
-              variant="primary"
-              onClick={() => navigate("/login")}
-              className="mx-3"
-            >
-              로그인
-            </Button>
+            <div>
+              <Button
+                variant="primary"
+                onClick={() => navigate("/login")}
+                className="mx-3"
+              >
+                로그인
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => navigate("/register")}
+                className="mx-3"
+              >
+                회원 가입
+              </Button>
+            </div>
           )}
           {isLogin && (
             <Navbar.Text>
